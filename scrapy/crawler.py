@@ -3,10 +3,13 @@ import signal
 import warnings
 
 from twisted.internet import reactor, defer
+from zope.interface.verify import verifyClass, DoesNotImplement
 
 from scrapy.core.engine import ExecutionEngine
 from scrapy.resolver import CachingThreadedResolver
+from scrapy.interfaces import ISpiderLoader
 from scrapy.extension import ExtensionManager
+from scrapy.settings import Settings
 from scrapy.signalmanager import SignalManager
 from scrapy.exceptions import ScrapyDeprecationWarning
 from scrapy.utils.ossignal import install_shutdown_handlers, signal_names
@@ -17,13 +20,20 @@ from scrapy import log, signals
 class Crawler(object):
 
     def __init__(self, spidercls, settings):
+        if isinstance(settings, dict):
+            settings = Settings(settings)
+
         self.spidercls = spidercls
-        self.settings = settings
+        self.settings = settings.copy()
+
         self.signals = SignalManager(self)
         self.stats = load_object(self.settings['STATS_CLASS'])(self)
         lf_cls = load_object(self.settings['LOG_FORMATTER'])
         self.logformatter = lf_cls.from_crawler(self)
         self.extensions = ExtensionManager.from_crawler(self)
+
+        self.spidercls.update_settings(self.settings)
+        self.settings.freeze()
 
         self.crawling = False
         self.spider = None
@@ -33,12 +43,11 @@ class Crawler(object):
     def spiders(self):
         if not hasattr(self, '_spiders'):
             warnings.warn("Crawler.spiders is deprecated, use "
-                          "CrawlerRunner.spiders or instantiate "
-                          "scrapy.spidermanager.SpiderManager with your "
+                          "CrawlerRunner.spider_loader or instantiate "
+                          "scrapy.spiderloader.SpiderLoader with your "
                           "settings.",
                           category=ScrapyDeprecationWarning, stacklevel=2)
-            spman_cls = load_object(self.settings['SPIDER_MANAGER_CLASS'])
-            self._spiders = spman_cls.from_settings(self.settings)
+            self._spiders = _get_spider_loader(self.settings.frozencopy())
         return self._spiders
 
     @defer.inlineCallbacks
@@ -72,15 +81,26 @@ class Crawler(object):
 class CrawlerRunner(object):
 
     def __init__(self, settings):
+        if isinstance(settings, dict):
+            settings = Settings(settings)
         self.settings = settings
-        smcls = load_object(settings['SPIDER_MANAGER_CLASS'])
-        self.spiders = smcls.from_settings(settings.frozencopy())
+        self.spider_loader = _get_spider_loader(settings)
         self.crawlers = set()
         self._active = set()
 
-    def crawl(self, spidercls, *args, **kwargs):
-        crawler = self._create_crawler(spidercls)
-        self._setup_crawler_logging(crawler)
+    @property
+    def spiders(self):
+        warnings.warn("CrawlerRunner.spiders attribute is renamed to "
+                      "CrawlerRunner.spider_loader.",
+                      category=ScrapyDeprecationWarning, stacklevel=2)
+        return self.spider_loader
+
+    def crawl(self, crawler_or_spidercls, *args, **kwargs):
+        crawler = crawler_or_spidercls
+        if not isinstance(crawler_or_spidercls, Crawler):
+            crawler = self._create_crawler(crawler_or_spidercls)
+            self._setup_crawler_logging(crawler)
+
         self.crawlers.add(crawler)
         d = crawler.crawl(*args, **kwargs)
         self._active.add(d)
@@ -94,12 +114,8 @@ class CrawlerRunner(object):
 
     def _create_crawler(self, spidercls):
         if isinstance(spidercls, six.string_types):
-            spidercls = self.spiders.load(spidercls)
-
-        crawler_settings = self.settings.copy()
-        spidercls.update_settings(crawler_settings)
-        crawler_settings.freeze()
-        return Crawler(spidercls, crawler_settings)
+            spidercls = self.spider_loader.load(spidercls)
+        return Crawler(spidercls, self.settings)
 
     def _setup_crawler_logging(self, crawler):
         log_observer = log.start_from_crawler(crawler)
@@ -149,9 +165,11 @@ class CrawlerProcess(CrawlerRunner):
                 return
             d.addBoth(lambda _: self._stop_reactor())
 
-        if self.settings.getbool('DNSCACHE_ENABLED'):
-            reactor.installResolver(CachingThreadedResolver(reactor))
-
+        cache_size = self.settings.getint('DNSCACHE_SIZE') if self.settings.getbool('DNSCACHE_ENABLED') else 0
+        reactor.installResolver(CachingThreadedResolver(reactor, cache_size,
+                                                            self.settings.getfloat('DNS_TIMEOUT')))
+        tp = reactor.getThreadPool()
+        tp.adjustPoolsize(maxthreads=self.settings.getint('REACTOR_THREADPOOL_MAXSIZE'))
         reactor.addSystemEventTrigger('before', 'shutdown', self.stop)
         reactor.run(installSignalHandlers=False)  # blocking call
 
@@ -164,3 +182,26 @@ class CrawlerProcess(CrawlerRunner):
             reactor.stop()
         except RuntimeError:  # raised if already stopped or in shutdown stage
             pass
+
+
+def _get_spider_loader(settings):
+    """ Get SpiderLoader instance from settings """
+    if settings.get('SPIDER_MANAGER_CLASS'):
+        warnings.warn(
+            'SPIDER_MANAGER_CLASS option is deprecated. '
+            'Please use SPIDER_LOADER_CLASS.',
+            category=ScrapyDeprecationWarning, stacklevel=2
+        )
+    cls_path = settings.get('SPIDER_MANAGER_CLASS',
+                            settings.get('SPIDER_LOADER_CLASS'))
+    loader_cls = load_object(cls_path)
+    try:
+        verifyClass(ISpiderLoader, loader_cls)
+    except DoesNotImplement:
+        warnings.warn(
+            'SPIDER_LOADER_CLASS (previously named SPIDER_MANAGER_CLASS) does '
+            'not fully implement scrapy.interfaces.ISpiderLoader interface. '
+            'Please add all missing methods to avoid unexpected runtime errors.',
+            category=ScrapyDeprecationWarning, stacklevel=2
+        )
+    return loader_cls.from_settings(settings.frozencopy())

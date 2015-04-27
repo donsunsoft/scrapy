@@ -16,6 +16,8 @@ project (in case you have many).
 
 For a list of available built-in settings see: :ref:`topics-settings-ref`.
 
+.. _topics-settings-module-envvar:
+
 Designating the settings
 ========================
 
@@ -26,7 +28,7 @@ The value of ``SCRAPY_SETTINGS_MODULE`` should be in Python path syntax, e.g.
 ``myproject.settings``. Note that the settings module should be on the
 Python `import search path`_.
 
-.. _import search path: http://docs.python.org/2/tutorial/modules.html#the-module-search-path
+.. _import search path: https://docs.python.org/2/tutorial/modules.html#the-module-search-path
 
 Populating the settings
 =======================
@@ -288,6 +290,24 @@ Default: ``True``
 
 Whether to enable DNS in-memory cache.
 
+.. setting:: DNSCACHE_SIZE
+
+DNSCACHE_SIZE
+----------------
+
+Default: ``10000``
+
+DNS in-memory cache size.
+
+.. setting:: DNS_TIMEOUT
+
+DNS_TIMEOUT
+----------------
+
+Default: ``60``
+
+Timeout for processing of DNS queries in seconds. Float is supported.
+
 .. setting:: DOWNLOADER
 
 DOWNLOADER
@@ -432,6 +452,8 @@ Default: `1073741824` (1024MB)
 The maximum response size (in bytes) that downloader will download.
 
 If you want to disable it set to 0.
+
+.. reqmeta:: download_maxsize
 
 .. note::
 
@@ -740,6 +762,18 @@ If :setting:`DOWNLOAD_DELAY` is zero (default) this option has no effect.
 
 .. _wget: http://www.gnu.org/software/wget/manual/wget.html
 
+.. setting:: REACTOR_THREADPOOL_MAXSIZE
+
+REACTOR_THREADPOOL_MAXSIZE
+--------------------------
+
+Default: ``10``
+
+The maximum limit for Twisted Reactor thread pool size. This is common
+multi-purpose thread pool used by various Scrapy components. Threaded
+DNS Resolver, BlockingFeedStorage, S3FilesStore just to name a few. Increase
+this value if you're experiencing problems with insufficient blocking IO.
+
 .. setting:: REDIRECT_MAX_TIMES
 
 REDIRECT_MAX_TIMES
@@ -819,15 +853,15 @@ A dict containing the scrapy contracts enabled by default in Scrapy. You should
 never modify this setting in your project, modify :setting:`SPIDER_CONTRACTS`
 instead. For more info see :ref:`topics-contracts`.
 
-.. setting:: SPIDER_MANAGER_CLASS
+.. setting:: SPIDER_LOADER_CLASS
 
-SPIDER_MANAGER_CLASS
---------------------
+SPIDER_LOADER_CLASS
+-------------------
 
-Default: ``'scrapy.spidermanager.SpiderManager'``
+Default: ``'scrapy.spiderloader.SpiderLoader'``
 
-The class that will be used for handling spiders, which must implement the
-:ref:`topics-api-spidermanager`.
+The class that will be used for loading spiders, which must implement the
+:ref:`topics-api-spiderloader`.
 
 .. setting:: SPIDER_MIDDLEWARES
 

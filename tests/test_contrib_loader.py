@@ -3,11 +3,10 @@ from functools import partial
 
 from scrapy.contrib.loader import ItemLoader
 from scrapy.contrib.loader.processor import Join, Identity, TakeFirst, \
-    Compose, MapCompose
+    Compose, MapCompose, SelectJmes
 from scrapy.item import Item, Field
 from scrapy.selector import Selector
 from scrapy.http import HtmlResponse
-
 
 # test items
 class NameItem(Item):
@@ -85,6 +84,27 @@ class BasicItemLoaderTest(unittest.TestCase):
 
         il.replace_value('sku', [valid_fragment], re=sku_re)
         self.assertEqual(il.load_item()['sku'], u'1234')
+
+    def test_self_referencing_loader(self):
+        class MyLoader(ItemLoader):
+            url_out = TakeFirst()
+
+            def img_url_out(self, values):
+                return (self.get_output_value('url') or '') + values[0]
+
+        il = MyLoader(item={})
+        il.add_value('url', 'http://example.com/')
+        il.add_value('img_url', '1234.png')
+        self.assertEqual(il.load_item(), {
+            'url': 'http://example.com/',
+            'img_url': 'http://example.com/1234.png',
+        })
+
+        il = MyLoader(item={})
+        il.add_value('img_url', '1234.png')
+        self.assertEqual(il.load_item(), {
+            'img_url': '1234.png',
+        })
 
     def test_add_value(self):
         il = TestItemLoader()
@@ -577,6 +597,31 @@ class SelectortemLoaderTest(unittest.TestCase):
         self.assertEqual(l.get_output_value('url'), [u'http://www.scrapy.org'])
         l.replace_css('url', 'a::attr(href)', re='http://www\.(.+)')
         self.assertEqual(l.get_output_value('url'), [u'scrapy.org'])
+
+
+class SelectJmesTestCase(unittest.TestCase):
+        test_list_equals = {
+            'simple': ('foo.bar', {"foo": {"bar": "baz"}}, "baz"),
+            'invalid': ('foo.bar.baz', {"foo": {"bar": "baz"}}, None),
+            'top_level': ('foo', {"foo": {"bar": "baz"}}, {"bar": "baz"}),
+            'double_vs_single_quote_string': ('foo.bar', {"foo": {"bar": "baz"}}, "baz"),
+            'dict': (
+                'foo.bar[*].name',
+                {"foo": {"bar": [{"name": "one"}, {"name": "two"}]}},
+                ['one', 'two']
+            ),
+            'list': ('[1]', [1, 2], 2)
+        }
+
+        def test_output(self):
+            for l in self.test_list_equals:
+                expr, test_list, expected = self.test_list_equals[l]
+                test = SelectJmes(expr)(test_list)
+                self.assertEqual(
+                    test,
+                    expected,
+                    msg='test "{}" got {} expected {}'.format(l, test, expected)
+                )
 
 
 if __name__ == "__main__":

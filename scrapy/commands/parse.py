@@ -107,7 +107,7 @@ class Command(ScrapyCommand):
         items, requests = [], []
 
         for x in iterate_spider_output(cb(response)):
-            if isinstance(x, BaseItem):
+            if isinstance(x, (BaseItem, dict)):
                 items.append(x)
             elif isinstance(x, Request):
                 requests.append(x)
@@ -124,15 +124,15 @@ class Command(ScrapyCommand):
                     level=log.ERROR, spider=spider.name)
 
     def set_spidercls(self, url, opts):
-        spiders = self.crawler_process.spiders
+        spider_loader = self.crawler_process.spider_loader
         if opts.spider:
             try:
-                self.spidercls = spiders.load(opts.spider)
+                self.spidercls = spider_loader.load(opts.spider)
             except KeyError:
                 log.msg(format='Unable to find spider: %(spider)s',
                         level=log.ERROR, spider=opts.spider)
         else:
-            self.spidercls = spidercls_for_request(spiders, Request(url))
+            self.spidercls = spidercls_for_request(spider_loader, Request(url))
             if not self.spidercls:
                 log.msg(format='Unable to find spider for: %(url)s',
                         level=log.ERROR, url=url)

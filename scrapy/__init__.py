@@ -1,5 +1,5 @@
 """
-Scrapy - a screen scraping framework written in Python
+Scrapy - a web crawling and screen scraping framework written for Python
 """
 
 __all__ = ['__version__', 'version_info', 'optional_features', 'twisted_version',
@@ -38,13 +38,6 @@ except ImportError:
     pass
 else:
     optional_features.add('boto')
-try:
-    import django
-    del django
-except ImportError:
-    pass
-else:
-    optional_features.add('django')
 
 from twisted import version as _txv
 twisted_version = (_txv.major, _txv.minor, _txv.micro)

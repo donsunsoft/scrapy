@@ -3,6 +3,42 @@
 Release notes
 =============
 
+0.24.6 (2015-04-20)
+-------------------
+
+- encode invalid xpath with unicode_escape under PY2 (:commit:`07cb3e5`)
+- fix IPython shell scope issue and load IPython user config (:commit:`2c8e573`)
+- Fix small typo in the docs (:commit:`d694019`)
+- Fix small typo (:commit:`f92fa83`)
+- Converted sel.xpath() calls to response.xpath() in Extracting the data (:commit:`c2c6d15`)
+
+
+0.24.5 (2015-02-25)
+-------------------
+
+- Support new _getEndpoint Agent signatures on Twisted 15.0.0 (:commit:`540b9bc`)
+- DOC a couple more references are fixed (:commit:`b4c454b`)
+- DOC fix a reference (:commit:`e3c1260`)
+- t.i.b.ThreadedResolver is now a new-style class (:commit:`9e13f42`)
+- S3DownloadHandler: fix auth for requests with quoted paths/query params (:commit:`cdb9a0b`)
+- fixed the variable types in mailsender documentation (:commit:`bb3a848`)
+- Reset items_scraped instead of item_count (:commit:`edb07a4`)
+- Tentative attention message about what document to read for contributions (:commit:`7ee6f7a`)
+- mitmproxy 0.10.1 needs netlib 0.10.1 too (:commit:`874fcdd`)
+- pin mitmproxy 0.10.1 as >0.11 does not work with tests (:commit:`c6b21f0`)
+- Test the parse command locally instead of against an external url (:commit:`c3a6628`)
+- Patches Twisted issue while closing the connection pool on HTTPDownloadHandler (:commit:`d0bf957`)
+- Updates documentation on dynamic item classes. (:commit:`eeb589a`)
+- Merge pull request #943 from Lazar-T/patch-3 (:commit:`5fdab02`)
+- typo (:commit:`b0ae199`)
+- pywin32 is required by Twisted. closes #937 (:commit:`5cb0cfb`)
+- Update install.rst (:commit:`781286b`)
+- Merge pull request #928 from Lazar-T/patch-1 (:commit:`b415d04`)
+- comma instead of fullstop (:commit:`627b9ba`)
+- Merge pull request #885 from jsma/patch-1 (:commit:`de909ad`)
+- Update request-response.rst (:commit:`3f3263d`)
+- SgmlLinkExtractor - fix for parsing <area> tag with Unicode present (:commit:`49b40f0`)
+
 0.24.4 (2014-08-09)
 -------------------
 
@@ -552,7 +588,7 @@ Scrapy changes:
 ------
 
 - added precise to supported ubuntu distros (:commit:`b7e46df`)
-- fixed bug in json-rpc webservice reported in https://groups.google.com/d/topic/scrapy-users/qgVBmFybNAQ/discussion. also removed no longer supported 'run' command from extras/scrapy-ws.py (:commit:`340fbdb`)
+- fixed bug in json-rpc webservice reported in https://groups.google.com/forum/#!topic/scrapy-users/qgVBmFybNAQ/discussion. also removed no longer supported 'run' command from extras/scrapy-ws.py (:commit:`340fbdb`)
 - meta tag attributes for content-type http equiv can be in any order. #123 (:commit:`0cb68af`)
 - replace "import Image" by more standard "from PIL import Image". closes #88 (:commit:`4d17048`)
 - return trial status as bin/runtests.sh exit value. #118 (:commit:`b7b2e7f`)
@@ -876,14 +912,14 @@ Backwards-incompatible changes
 First release of Scrapy.
 
 
-.. _AJAX crawleable urls: http://code.google.com/web/ajaxcrawling/docs/getting-started.html
+.. _AJAX crawleable urls: https://developers.google.com/webmasters/ajax-crawling/docs/getting-started?csw=1
 .. _chunked transfer encoding: http://en.wikipedia.org/wiki/Chunked_transfer_encoding
 .. _w3lib: https://github.com/scrapy/w3lib
 .. _scrapely: https://github.com/scrapy/scrapely
-.. _marshal: http://docs.python.org/library/marshal.html
+.. _marshal: https://docs.python.org/2/library/marshal.html
 .. _w3lib.encoding: https://github.com/scrapy/w3lib/blob/master/w3lib/encoding.py
 .. _lxml: http://lxml.de/
 .. _ClientForm: http://wwwsearch.sourceforge.net/old/ClientForm/
-.. _resource: http://docs.python.org/library/resource.html
+.. _resource: https://docs.python.org/2/library/resource.html
 .. _queuelib: https://github.com/scrapy/queuelib
 .. _cssselect: https://github.com/SimonSapin/cssselect

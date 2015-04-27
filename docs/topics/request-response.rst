@@ -157,7 +157,7 @@ Request objects
         ``copy()`` or ``replace()`` methods, and can also be accessed, in your
         spider, from the ``response.meta`` attribute.
 
-    .. _shallow copied: http://docs.python.org/library/copy.html
+    .. _shallow copied: https://docs.python.org/2/library/copy.html
 
     .. method:: Request.copy()
 
@@ -224,12 +224,16 @@ Those are:
 * :reqmeta:`dont_redirect`
 * :reqmeta:`dont_retry`
 * :reqmeta:`handle_httpstatus_list`
+* :reqmeta:`handle_httpstatus_all`
 * ``dont_merge_cookies`` (see ``cookies`` parameter of :class:`Request` constructor)
 * :reqmeta:`cookiejar`
+  :reqmeta:`dont_cache`
 * :reqmeta:`redirect_urls`
 * :reqmeta:`bindaddress`
 * :reqmeta:`dont_obey_robotstxt`
 * :reqmeta:`download_timeout`
+* :reqmeta:`download_maxsize`
+* :reqmeta:`proxy`
 
 .. reqmeta:: bindaddress
 
@@ -488,6 +492,18 @@ Response objects
        Returns a Response object with the same members, except for those members
        given new values by whichever keyword arguments are specified. The
        attribute :attr:`Response.meta` is copied by default.
+
+    .. method:: Response.urljoin(url)
+
+        Constructs an absolute url by combining the Response's :attr:`url` with
+        a possible relative url.
+
+        This is a wrapper over `urlparse.urljoin`_, it's merely an alias for
+        making this call::
+
+            urlparse.urljoin(response.url, url)
+
+.. _urlparse.urljoin: https://docs.python.org/2/library/urlparse.html#urlparse.urljoin
 
 .. _topics-request-response-ref-response-subclasses:
 

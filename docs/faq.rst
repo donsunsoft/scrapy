@@ -21,8 +21,8 @@ comparing `jinja2`_ to `Django`_.
 
 .. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
 .. _lxml: http://lxml.de/
-.. _jinja2: http://jinja.pocoo.org/2/
-.. _Django: http://www.djangoproject.com
+.. _jinja2: http://jinja.pocoo.org/
+.. _Django: https://www.djangoproject.com/
 
 .. _faq-python-versions:
 
@@ -57,7 +57,7 @@ focus on the real problems we need to solve.
 We'd be proud if Scrapy serves as an inspiration for other projects. Feel free
 to steal from us!
 
-.. _Django: http://www.djangoproject.com
+.. _Django: https://www.djangoproject.com/
 
 Does Scrapy work with HTTP proxies?
 -----------------------------------
@@ -154,7 +154,7 @@ For more info see:
 What is the recommended way to deploy a Scrapy crawler in production?
 ---------------------------------------------------------------------
 
-See :ref:`topics-scrapyd`.
+See :ref:`topics-deploy`.
 
 Can I use JSON for large exports?
 ---------------------------------
@@ -221,7 +221,7 @@ more info on how it works see `this page`_. Also, here's an `example spider`_
 which scrapes one of these sites.
 
 .. _this page: http://search.cpan.org/~ecarroll/HTML-TreeBuilderX-ASP_NET-0.09/lib/HTML/TreeBuilderX/ASP_NET.pm
-.. _example spider: http://github.com/AmbientLighter/rpn-fas/blob/master/fas/spiders/rnp.py
+.. _example spider: https://github.com/AmbientLighter/rpn-fas/blob/master/fas/spiders/rnp.py
 
 What's the best way to parse big XML/CSV data feeds?
 ----------------------------------------------------

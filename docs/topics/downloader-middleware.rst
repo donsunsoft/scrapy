@@ -328,6 +328,9 @@ HttpCacheMiddleware
     You can change the HTTP cache policy with the :setting:`HTTPCACHE_POLICY`
     setting. Or you can also implement your own policy.
 
+    .. reqmeta:: dont_cache
+
+    You can also avoid caching a response on every policy using :reqmeta:`dont_cache` meta key equals `True`.
 
 .. _httpcache-policy-dummy:
 
@@ -373,7 +376,7 @@ what is implemented:
 
 what is missing:
 
-* `Pragma: no-cache` support http://www.mnot.net/cache_docs/#PRAGMA
+* `Pragma: no-cache` support http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9.1
 * `Vary` header support http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html#sec13.6
 * Invalidation after updates or deletes http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html#sec13.10
 * ... probably others ..
@@ -448,7 +451,7 @@ In order to use this storage backend:
 * install `LevelDB python bindings`_ like ``pip install leveldb``
 
 .. _LevelDB: http://code.google.com/p/leveldb/
-.. _leveldb python bindings: http://pypi.python.org/pypi/leveldb
+.. _leveldb python bindings: https://pypi.python.org/pypi/leveldb
 
 
 HTTPCache middleware settings
@@ -560,6 +563,18 @@ Default: ``'scrapy.contrib.httpcache.DummyPolicy'``
 
 The class which implements the cache policy.
 
+.. setting:: HTTPCACHE_GZIP
+
+HTTPCACHE_GZIP
+^^^^^^^^^^^^^^
+
+.. versionadded:: 0.25
+
+Default: ``False``
+
+If enabled, will compress all cached data with gzip.
+This setting is specific to the Filesystem backend.
+
 
 HttpCompressionMiddleware
 -------------------------
@@ -603,10 +618,12 @@ HttpProxyMiddleware
 
 .. versionadded:: 0.8
 
+.. reqmeta:: proxy
+
 .. class:: HttpProxyMiddleware
 
    This middleware sets the HTTP proxy to use for requests, by setting the
-   ``proxy`` meta value to :class:`~scrapy.http.Request` objects.
+   ``proxy`` meta value for :class:`~scrapy.http.Request` objects.
 
    Like the Python standard library modules `urllib`_ and `urllib2`_, it obeys
    the following environment variables:
@@ -615,8 +632,11 @@ HttpProxyMiddleware
    * ``https_proxy``
    * ``no_proxy``
 
-.. _urllib: http://docs.python.org/library/urllib.html
-.. _urllib2: http://docs.python.org/library/urllib2.html
+   You can also set the meta key ``proxy`` per-request, to a value like
+   ``http://some_proxy_server:port``.
+
+.. _urllib: https://docs.python.org/2/library/urllib.html
+.. _urllib2: https://docs.python.org/2/library/urllib2.html
 
 RedirectMiddleware
 ------------------
@@ -870,5 +890,5 @@ enable it for :ref:`broad crawls <topics-broad-crawls>`.
 
 
 .. _DBM: http://en.wikipedia.org/wiki/Dbm
-.. _anydbm: http://docs.python.org/library/anydbm.html
+.. _anydbm: https://docs.python.org/2/library/anydbm.html
 .. _chunked transfer encoding: http://en.wikipedia.org/wiki/Chunked_transfer_encoding

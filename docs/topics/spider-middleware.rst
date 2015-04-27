@@ -90,18 +90,19 @@ following methods:
         it has processed the response.
 
         :meth:`process_spider_output` must return an iterable of
-        :class:`~scrapy.http.Request` or :class:`~scrapy.item.Item` objects.
+        :class:`~scrapy.http.Request`, dict or :class:`~scrapy.item.Item` 
+        objects.
 
         :param response: the response which generated this output from the
           spider
-        :type response: class:`~scrapy.http.Response` object
+        :type response: :class:`~scrapy.http.Response` object
 
         :param result: the result returned by the spider
-        :type result: an iterable of :class:`~scrapy.http.Request` or
-          :class:`~scrapy.item.Item` objects
+        :type result: an iterable of :class:`~scrapy.http.Request`, dict
+          or :class:`~scrapy.item.Item` objects
 
         :param spider: the spider whose result is being processed
-        :type spider: :class:`~scrapy.item.Spider` object
+        :type spider: :class:`~scrapy.spider.Spider` object
 
 
     .. method:: process_spider_exception(response, exception, spider)
@@ -110,7 +111,7 @@ following methods:
         method (from other spider middleware) raises an exception.
 
         :meth:`process_spider_exception` should return either ``None`` or an
-        iterable of :class:`~scrapy.http.Response` or
+        iterable of :class:`~scrapy.http.Response`, dict or
         :class:`~scrapy.item.Item` objects.
 
         If it returns ``None``, Scrapy will continue processing this exception,
@@ -156,10 +157,10 @@ following methods:
         :type start_requests: an iterable of :class:`~scrapy.http.Request`
 
         :param spider: the spider to whom the start requests belong
-        :type spider: :class:`~scrapy.item.Spider` object
+        :type spider: :class:`~scrapy.spider.Spider` object
 
 
-.. _Exception: http://docs.python.org/library/exceptions.html#exceptions.Exception
+.. _Exception: https://docs.python.org/2/library/exceptions.html#exceptions.Exception
 
 
 .. _topics-spider-middleware-ref:
@@ -225,9 +226,12 @@ this::
 
 .. reqmeta:: handle_httpstatus_list
 
+.. reqmeta:: handle_httpstatus_all
+
 The ``handle_httpstatus_list`` key of :attr:`Request.meta
 <scrapy.http.Request.meta>` can also be used to specify which response codes to
-allow on a per-request basis.
+allow on a per-request basis. You can also set the meta key ``handle_httpstatus_all``
+to ``True`` if you want to allow any response code for a request.
 
 Keep in mind, however, that it's usually a bad idea to handle non-200
 responses, unless you really know what you're doing.

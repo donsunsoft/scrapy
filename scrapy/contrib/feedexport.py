@@ -146,20 +146,13 @@ class FeedExporter(object):
         if not self._exporter_supported(self.format):
             raise NotConfigured
         self.store_empty = settings.getbool('FEED_STORE_EMPTY')
+        self.export_fields = settings.getlist('FEED_EXPORT_FIELDS')
         uripar = settings['FEED_URI_PARAMS']
         self._uripar = load_object(uripar) if uripar else lambda x, y: None
 
     @classmethod
     def from_crawler(cls, crawler):
-        if len(get_func_args(cls)) < 1:
-            # FIXME: remove for scrapy 0.17
-            import warnings
-            from scrapy.exceptions import ScrapyDeprecationWarning
-            warnings.warn("%s must receive a settings object as first constructor argument." % cls.__name__,
-                ScrapyDeprecationWarning, stacklevel=2)
-            o = cls()
-        else:
-            o = cls(crawler.settings)
+        o = cls(crawler.settings)
         crawler.signals.connect(o.open_spider, signals.spider_opened)
         crawler.signals.connect(o.close_spider, signals.spider_closed)
         crawler.signals.connect(o.item_scraped, signals.item_scraped)
@@ -169,7 +162,7 @@ class FeedExporter(object):
         uri = self.urifmt % self._get_uri_params(spider)
         storage = self._get_storage(uri)
         file = storage.open(spider)
-        exporter = self._get_exporter(file)
+        exporter = self._get_exporter(file, fields_to_export=self.export_fields)
         exporter.start_exporting()
         self.slot = SpiderSlot(file, exporter, storage, uri)
 
@@ -218,8 +211,8 @@ class FeedExporter(object):
         else:
             log.msg("Unknown feed storage scheme: %s" % scheme, log.ERROR)
 
-    def _get_exporter(self, *a, **kw):
-        return self.exporters[self.format](*a, **kw)
+    def _get_exporter(self, *args, **kwargs):
+        return self.exporters[self.format](*args, **kwargs)
 
     def _get_storage(self, uri):
         return self.storages[urlparse(uri).scheme](uri)

@@ -140,9 +140,9 @@ Here is the code of such extension::
 
         def item_scraped(self, item, spider):
             self.items_scraped += 1
-            if self.items_scraped == self.item_count:
-                spider.log("scraped %d items, resetting counter" % self.items_scraped)
-                self.item_count = 0
+            if self.items_scraped % self.item_count == 0:
+                spider.log("scraped %d items" % self.items_scraped)
+                
 
 .. _topics-extensions-ref:
 
@@ -368,5 +368,5 @@ For more info see `Debugging in Python`.
 
 This extension only works on POSIX-compliant platforms (ie. not Windows).
 
-.. _Python debugger: http://docs.python.org/library/pdb.html
+.. _Python debugger: https://docs.python.org/2/library/pdb.html
 .. _Debugging in Python: http://www.ferg.org/papers/debugging_in_python.html

@@ -19,7 +19,7 @@ from scrapy.http import Headers
 from scrapy.responsetypes import responsetypes
 from scrapy.core.downloader.webclient import _parse
 from scrapy.utils.misc import load_object
-from scrapy import log
+from scrapy import log, twisted_version
 
 
 class HTTP11DownloadHandler(object):
@@ -32,6 +32,7 @@ class HTTP11DownloadHandler(object):
         self._contextFactory = self._contextFactoryClass()
         self._default_maxsize = settings.getint('DOWNLOAD_MAXSIZE')
         self._default_warnsize = settings.getint('DOWNLOAD_WARNSIZE')
+        self._disconnect_timeout = 1
 
     def download_request(self, request, spider):
         """Return a deferred for the HTTP download"""
@@ -41,7 +42,24 @@ class HTTP11DownloadHandler(object):
         return agent.download_request(request)
 
     def close(self):
-        return self._pool.closeCachedConnections()
+        d = self._pool.closeCachedConnections()
+        # closeCachedConnections will hang on network or server issues, so
+        # we'll manually timeout the deferred.
+        #
+        # Twisted issue addressing this problem can be found here:
+        # https://twistedmatrix.com/trac/ticket/7738.
+        #
+        # closeCachedConnections doesn't handle external errbacks, so we'll
+        # issue a callback after `_disconnect_timeout` seconds.
+        delayed_call = reactor.callLater(self._disconnect_timeout, d.callback, [])
+
+        def cancel_delayed_call(result):
+            if delayed_call.active():
+                delayed_call.cancel()
+            return result
+
+        d.addBoth(cancel_delayed_call)
+        return d
 
 
 class TunnelError(Exception):
@@ -124,10 +142,19 @@ class TunnelingAgent(Agent):
         self._proxyConf = proxyConf
         self._contextFactory = contextFactory
 
-    def _getEndpoint(self, scheme, host, port):
-        return TunnelingTCP4ClientEndpoint(self._reactor, host, port,
-            self._proxyConf, self._contextFactory, self._connectTimeout,
-            self._bindAddress)
+    if twisted_version >= (15, 0, 0):
+        def _getEndpoint(self, uri):
+            return TunnelingTCP4ClientEndpoint(
+                self._reactor, uri.host, uri.port, self._proxyConf,
+                self._contextFactory, self._endpointFactory._connectTimeout,
+                self._endpointFactory._bindAddress)
+    else:
+        def _getEndpoint(self, scheme, host, port):
+            return TunnelingTCP4ClientEndpoint(
+                self._reactor, host, port, self._proxyConf,
+                self._contextFactory, self._connectTimeout,
+                self._bindAddress)
+
 
 
 class ScrapyAgent(object):

@@ -52,6 +52,8 @@ DEPTH_STATS = True
 DEPTH_PRIORITY = 0
 
 DNSCACHE_ENABLED = True
+DNSCACHE_SIZE = 10000
+DNS_TIMEOUT = 60
 
 DOWNLOAD_DELAY = 0
 
@@ -126,6 +128,7 @@ FEED_URI = None
 FEED_URI_PARAMS = None  # a function to extend uri arguments
 FEED_FORMAT = 'jsonlines'
 FEED_STORE_EMPTY = False
+FEED_EXPORT_FIELDS = None
 FEED_STORAGES = {}
 FEED_STORAGES_BASE = {
     '': 'scrapy.contrib.feedexport.FileFeedStorage',
@@ -154,6 +157,7 @@ HTTPCACHE_IGNORE_HTTP_CODES = []
 HTTPCACHE_IGNORE_SCHEMES = ['file']
 HTTPCACHE_DBM_MODULE = 'anydbm'
 HTTPCACHE_POLICY = 'scrapy.contrib.httpcache.DummyPolicy'
+HTTPCACHE_GZIP = False
 
 ITEM_PROCESSOR = 'scrapy.contrib.pipeline.ItemPipelineManager'
 
@@ -193,6 +197,8 @@ NEWSPIDER_MODULE = ''
 
 RANDOMIZE_DOWNLOAD_DELAY = True
 
+REACTOR_THREADPOOL_MAXSIZE = 10
+
 REDIRECT_ENABLED = True
 REDIRECT_MAX_TIMES = 20  # uses Firefox default setting
 REDIRECT_PRIORITY_ADJUST = +2
@@ -210,7 +216,7 @@ SCHEDULER = 'scrapy.core.scheduler.Scheduler'
 SCHEDULER_DISK_QUEUE = 'scrapy.squeue.PickleLifoDiskQueue'
 SCHEDULER_MEMORY_QUEUE = 'scrapy.squeue.LifoMemoryQueue'
 
-SPIDER_MANAGER_CLASS = 'scrapy.spidermanager.SpiderManager'
+SPIDER_LOADER_CLASS = 'scrapy.spiderloader.SpiderLoader'
 
 SPIDER_MIDDLEWARES = {}
 

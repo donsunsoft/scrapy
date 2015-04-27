@@ -101,7 +101,7 @@ how you :ref:`configure the downloader middlewares
 
 .. class:: CrawlerRunner(settings)
 
-    This is a convenient helper class that creates, configures and runs
+    This is a convenient helper class that keeps track of, manages and runs
     crawlers inside an already setup Twisted `reactor`_.
 
     The CrawlerRunner object must be instantiated with a
@@ -116,23 +116,23 @@ how you :ref:`configure the downloader middlewares
        Set of :class:`crawlers <scrapy.crawler.Crawler>` created by the
        :meth:`crawl` method.
 
-    .. attribute:: crawl_deferreds
+    .. method:: crawl(crawler_or_spidercls, \*args, \**kwargs)
 
-       Set of the `deferreds`_ return by the :meth:`crawl` method. This
-       collection it's useful for keeping track of current crawling state.
+       This method runs a crawler with the provided arguments.
 
-    .. method:: crawl(spidercls, \*args, \**kwargs)
+       It will keep track of the given crawler so it can be stopped later,
+       while calling its :meth:`Crawler.crawl` method.
 
-       This method sets up the crawling of the given `spidercls` with the
-       provided arguments.
-
-       It takes care of loading the spider class while configuring and starting
-       a crawler for it.
+       If `crawler_or_spidercls` isn't a :class:`~scrapy.crawler.Crawler`
+       instance, it will try to create one using this parameter as the spider
+       class given to it.
 
        Returns a deferred that is fired when the crawl is finished.
 
-       :param spidercls: spider class or spider's name inside the project
-       :type spidercls: :class:`~scrapy.spider.Spider` subclass or str
+       :param crawler_or_spidercls: already created crawler, or a spider class
+       or spider's name inside the project to create it
+       :type crawler_or_spidercls: :class:`~scrapy.crawler.Crawler` instance,
+        :class:`~scrapy.spider.Spider` subclass or string
 
        :param args: arguments to initializate the spider
        :type args: list
@@ -344,22 +344,22 @@ Settings API
 
        Alias for a :meth:`~freeze` call in the object returned by :meth:`copy`
 
-.. _topics-api-spidermanager:
+.. _topics-api-spiderloader:
 
-SpiderManager API
-=================
+SpiderLoader API
+================
 
-.. module:: scrapy.spidermanager
-   :synopsis: The spider manager
+.. module:: scrapy.loader
+   :synopsis: The spider loader
 
-.. class:: SpiderManager
+.. class:: SpiderLoader
 
     This class is in charge of retrieving and handling the spider classes
     defined across the project.
 
-    Custom spider managers can be employed by specifying their path in the
-    :setting:`SPIDER_MANAGER_CLASS` project setting. They must fully implement
-    the :class:`scrapy.interfaces.ISpiderManager` interface to guarantee an
+    Custom spider loaders can be employed by specifying their path in the
+    :setting:`SPIDER_LOADER_CLASS` project setting. They must fully implement
+    the :class:`scrapy.interfaces.ISpiderLoader` interface to guarantee an
     errorless execution.
 
     .. method:: from_settings(settings)
@@ -486,7 +486,7 @@ class (which they all inherit from).
 
         Set the given value for the given key only if current value for the
         same key is lower than value. If there is no current value for the
-        given key, the value is always set. 
+        given key, the value is always set.
 
     .. method:: min_value(key, value)
 
